@@ -49,6 +49,15 @@ class handler(BaseHTTPRequestHandler):
         with urlopen(request, timeout=8) as response:
             return json.loads(response.read() or b"[]")
 
+    def supabase_error(self, error):
+        try:
+            detail = json.loads(error.read().decode("utf-8"))
+            message = detail.get("message") or detail.get("hint") or "Supabase 요청이 거부되었습니다."
+            code = detail.get("code") or str(error.code)
+            return f"Supabase {code}: {message}"
+        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
+            return f"Supabase HTTP {getattr(error, 'code', 502)} 오류가 발생했습니다."
+
     def do_GET(self):
         try:
             rows = self.supabase_request()
@@ -63,8 +72,10 @@ class handler(BaseHTTPRequestHandler):
             ])
         except RuntimeError as error:
             self.send_json({"error": str(error)}, 503)
-        except (HTTPError, URLError, TimeoutError) as error:
-            self.send_json({"error": "Supabase에 연결하지 못했습니다."}, 502)
+        except HTTPError as error:
+            self.send_json({"error": self.supabase_error(error)}, 502)
+        except (URLError, TimeoutError):
+            self.send_json({"error": "Supabase 서버에 연결하지 못했습니다."}, 502)
 
     def do_POST(self):
         try:
@@ -88,5 +99,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_json({"error": str(error)}, 400)
         except RuntimeError as error:
             self.send_json({"error": str(error)}, 503)
-        except (HTTPError, URLError, TimeoutError):
-            self.send_json({"error": "Supabase에 저장하지 못했습니다."}, 502)
+        except HTTPError as error:
+            self.send_json({"error": self.supabase_error(error)}, 502)
+        except (URLError, TimeoutError):
+            self.send_json({"error": "Supabase 서버에 연결하지 못했습니다."}, 502)

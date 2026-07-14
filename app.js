@@ -60,8 +60,9 @@ function showToast(message) {
 async function loadHistory() {
   try {
     const response = await fetch('/api/draws');
-    if (!response.ok) throw new Error('저장 기록을 불러오지 못했습니다.');
-    const draws = await response.json();
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || '저장 기록을 불러오지 못했습니다.');
+    const draws = payload;
     historyStatus.textContent = draws.length ? `최근 ${draws.length}회 추첨` : '아직 저장된 추첨 기록이 없습니다.';
     historyList.innerHTML = draws.map(draw => {
       const date = new Date(draw.createdAt).toLocaleString('ko-KR');
@@ -71,7 +72,7 @@ async function loadHistory() {
       </div>`;
     }).join('');
   } catch (error) {
-    historyStatus.textContent = 'Supabase에 연결할 수 없습니다. Vercel 환경변수를 확인해 주세요.';
+    historyStatus.textContent = error.message;
   }
 }
 
@@ -81,7 +82,8 @@ async function saveDraw() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ games: savedGames, lockedNumbers: [...lockedNumbers] })
   });
-  if (!response.ok) throw new Error('추첨 결과를 저장하지 못했습니다.');
+  const payload = await response.json();
+  if (!response.ok) throw new Error(payload.error || '추첨 결과를 저장하지 못했습니다.');
   await loadHistory();
 }
 
@@ -146,7 +148,7 @@ async function draw() {
     await saveDraw();
     showToast('추첨 결과를 DB에 저장했어요');
   } catch (error) {
-    showToast('저장 실패: 서버를 확인해 주세요');
+    showToast(`저장 실패: ${error.message}`);
   }
   drawButton.disabled = false;
   drawButton.innerHTML = '<span>▶</span> 다시 섞기';
