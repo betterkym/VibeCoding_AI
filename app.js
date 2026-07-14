@@ -8,6 +8,9 @@ const copyButton = document.querySelector('#copyButton');
 const toast = document.querySelector('#toast');
 const ballStage = document.querySelector('#ballStage');
 const bottomPlay = document.querySelector('#bottomPlay');
+const historyList = document.querySelector('#historyList');
+const historyStatus = document.querySelector('#historyStatus');
+const refreshHistory = document.querySelector('#refreshHistory');
 
 let currentNumbers = [];
 let lockedNumbers = new Set();
@@ -46,6 +49,40 @@ function renderResults() {
       <div class="mini-balls">${game.map(n => `<span class="mini-ball ${colorFor(n)}">${n}</span>`).join('')}</div>
     </div>`).join('');
   resultsSection.hidden = false;
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+async function loadHistory() {
+  try {
+    const response = await fetch('/api/draws');
+    if (!response.ok) throw new Error('저장 기록을 불러오지 못했습니다.');
+    const draws = await response.json();
+    historyStatus.textContent = draws.length ? `최근 ${draws.length}회 추첨` : '아직 저장된 추첨 기록이 없습니다.';
+    historyList.innerHTML = draws.map(draw => {
+      const date = new Date(draw.createdAt).toLocaleString('ko-KR');
+      return `<div class="history-draw">
+        <div class="history-meta"><b>#${draw.id}</b><span>${date}</span></div>
+        ${draw.games.map((game, index) => `<div class="result-row"><span class="result-label">GAME ${String(index + 1).padStart(2, '0')}</span><div class="mini-balls">${game.map(n => `<span class="mini-ball ${colorFor(n)}">${n}</span>`).join('')}</div></div>`).join('')}
+      </div>`;
+    }).join('');
+  } catch (error) {
+    historyStatus.textContent = 'Supabase에 연결할 수 없습니다. Vercel 환경변수를 확인해 주세요.';
+  }
+}
+
+async function saveDraw() {
+  const response = await fetch('/api/draws', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ games: savedGames, lockedNumbers: [...lockedNumbers] })
+  });
+  if (!response.ok) throw new Error('추첨 결과를 저장하지 못했습니다.');
+  await loadHistory();
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -105,6 +142,12 @@ async function draw() {
   await revealNumbers(currentNumbers);
   renderResults();
   celebrate();
+  try {
+    await saveDraw();
+    showToast('추첨 결과를 DB에 저장했어요');
+  } catch (error) {
+    showToast('저장 실패: 서버를 확인해 주세요');
+  }
   drawButton.disabled = false;
   drawButton.innerHTML = '<span>▶</span> 다시 섞기';
 }
@@ -132,5 +175,7 @@ copyButton.addEventListener('click', async () => {
   const text = savedGames.map((game, i) => `${i + 1}게임: ${game.join(', ')}`).join('\n');
   try { await navigator.clipboard.writeText(text); }
   catch { const area = document.createElement('textarea'); area.value = text; document.body.append(area); area.select(); document.execCommand('copy'); area.remove(); }
-  toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1500);
+  showToast('번호를 복사했어요');
 });
+refreshHistory.addEventListener('click', loadHistory);
+loadHistory();
