@@ -43,7 +43,6 @@ class handler(BaseHTTPRequestHandler):
         body = json.dumps(payload).encode("utf-8") if payload is not None else None
         request = Request(endpoint, data=body, method=method)
         request.add_header("apikey", secret)
-        request.add_header("Authorization", f"Bearer {secret}")
         request.add_header("Content-Type", "application/json")
         if method == "POST":
             request.add_header("Prefer", "return=representation")
