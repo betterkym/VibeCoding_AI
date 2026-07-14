@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121212" />
+  <title>Lucky Mix — 오늘의 번호</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar" aria-label="주요 메뉴">
+    <a class="brand" href="#"><span class="brand-mark">✦</span> Lucky Mix</a>
+    <nav class="side-nav">
+      <a class="active" href="#">⌂ <span>홈</span></a>
+      <a href="#draw">⌕ <span>번호 찾기</span></a>
+      <a href="#resultsSection">♡ <span>내 조합</span></a>
+    </nav>
+    <div class="library">
+      <p>나의 보관함</p>
+      <div class="library-item"><span class="cover liked">♥</span><span><b>행운 번호</b><small>플레이리스트 · 나</small></span></div>
+      <div class="library-item"><span class="cover weekly">6</span><span><b>이번 주 조합</b><small>자동 업데이트</small></span></div>
+    </div>
+  </aside>
+
+  <main class="app-shell">
+    <nav class="topbar" aria-label="상단 메뉴">
+      <div class="history-buttons"><button aria-label="뒤로">‹</button><button aria-label="앞으로">›</button></div>
+      <span class="round-label">LUCKY MIX ORIGINAL</span>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">PLAYLIST</p>
+        <h1>오늘의<br><em>Lucky Mix</em></h1>
+        <p class="meta">매일 새롭게 섞이는 나만의 여섯 숫자</p>
+        <p class="intro">좋아하는 번호는 고정하고, 새로운 조합은 계속 탐색하세요.</p>
+        <a class="hero-play" href="#draw" aria-label="추첨 시작">▶</a>
+      </div>
+      <div class="ticket-art" aria-hidden="true">
+        <div class="ticket-number">07</div>
+        <div class="ticket-number pale">21</div>
+        <span class="spark s1">✦</span><span class="spark s2">✦</span><span class="spark s3">✦</span>
+        <div class="orbit"></div>
+      </div>
+    </section>
+
+    <section class="draw-card" id="draw">
+      <div class="card-head">
+        <div>
+          <p class="step">MADE FOR YOU</p>
+          <h2>오늘의 번호 믹스</h2>
+          <p>마음에 드는 번호를 누르면 다음 조합에도 유지됩니다.</p>
+        </div>
+        <button class="ghost-button" id="resetButton" type="button">↻ 초기화</button>
+      </div>
+
+      <div class="ball-stage" id="ballStage" aria-live="polite">
+        <button class="lotto-ball empty" data-index="0" aria-label="첫 번째 번호"></button>
+        <button class="lotto-ball empty" data-index="1" aria-label="두 번째 번호"></button>
+        <button class="lotto-ball empty" data-index="2" aria-label="세 번째 번호"></button>
+        <button class="lotto-ball empty" data-index="3" aria-label="네 번째 번호"></button>
+        <button class="lotto-ball empty" data-index="4" aria-label="다섯 번째 번호"></button>
+        <button class="lotto-ball empty" data-index="5" aria-label="여섯 번째 번호"></button>
+      </div>
+      <p class="lock-help">번호를 누르면 <span>고정</span>할 수 있어요</p>
+
+      <div class="controls">
+        <label class="game-count">게임 수
+          <select id="gameCount">
+            <option value="1">1게임</option>
+            <option value="3">3게임</option>
+            <option value="5">5게임</option>
+          </select>
+        </label>
+        <button class="draw-button" id="drawButton" type="button"><span>▶</span> 번호 섞기</button>
+      </div>
+    </section>
+
+    <section class="results-section" id="resultsSection" hidden>
+      <div class="results-head">
+        <div><p class="step">YOUR LIBRARY</p><h2>최근 생성한 조합</h2></div>
+        <button class="copy-button" id="copyButton" type="button">번호 복사</button>
+      </div>
+      <div class="results-list" id="resultsList"></div>
+    </section>
+
+    <footer><p>번호는 무작위로 생성되며 당첨을 보장하지 않습니다.</p><p>© 2026 Lucky Mix</p></footer>
+  </main>
+  <nav class="mobile-nav" aria-label="모바일 메뉴"><a href="#">⌂<span>홈</span></a><a href="#draw">⌕<span>찾기</span></a><a href="#resultsSection">♡<span>내 조합</span></a></nav>
+  <div class="now-playing">
+    <div class="now-info"><span class="now-cover">6</span><span><b>오늘의 Lucky Mix</b><small>무작위 번호 플레이리스트</small></span></div>
+    <div class="player-controls"><button>↶</button><button class="play-small" id="bottomPlay" aria-label="번호 추첨">▶</button><button>↷</button></div>
+    <div class="volume">⌕ ━━━━━</div>
+  </div>
+  <div class="toast" id="toast" role="status">복사했어요!</div>
+  <script src="app.js"></script>
+</body>
+</html>
